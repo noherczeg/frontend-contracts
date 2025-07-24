@@ -258,6 +258,41 @@
             opacity: 1;
             transition: stroke-dashoffset 0.8s ease-in-out, opacity 0.4s 0.8s linear;
         }
+        
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 820px) {
+             .component-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .container {
+                padding: 2rem 1rem;
+            }
+            h1 {
+                font-size: 1.75rem;
+            }
+            p {
+                margin-bottom: 1.5rem;
+            }
+            .layer h2 {
+                margin-top: -2.3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem 0;
+            }
+            .container {
+                width: 100%;
+                padding: 1.5rem 0.5rem;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -365,15 +400,27 @@
             const startRect = startElem.getBoundingClientRect();
             const endRect = endElem.getBoundingClientRect();
 
-            // Calculate start and end points relative to the diagram
-            const startX = startRect.right - diagramRect.left;
-            const startY = startRect.top - diagramRect.top + startRect.height / 2;
-            const endX = endRect.left - diagramRect.left;
-            const endY = endRect.top - diagramRect.top + endRect.height / 2;
-            
-            // Create a simple curved path
-            const pathData = `M ${startX} ${startY} C ${startX + 50} ${startY}, ${endX - 50} ${endY}, ${endX} ${endY}`;
-            pathElem.setAttribute('d', pathData);
+            let startX, startY, endX, endY;
+            const isVerticalLayout = window.innerWidth <= 820;
+
+            if (isVerticalLayout) {
+                 // Connect bottom-center to top-center for vertical layout
+                startX = startRect.left - diagramRect.left + startRect.width / 2;
+                startY = startRect.bottom - diagramRect.top;
+                endX = endRect.left - diagramRect.left + endRect.width / 2;
+                endY = endRect.top - diagramRect.top;
+                const pathData = `M ${startX} ${startY} C ${startX} ${startY + 40}, ${endX} ${endY - 40}, ${endX} ${endY}`;
+                pathElem.setAttribute('d', pathData);
+
+            } else {
+                 // Original logic for horizontal layout
+                startX = startRect.right - diagramRect.left;
+                startY = startRect.top - diagramRect.top + startRect.height / 2;
+                endX = endRect.left - diagramRect.left;
+                endY = endRect.top - diagramRect.top + endRect.height / 2;
+                const pathData = `M ${startX} ${startY} C ${startX + 50} ${startY}, ${endX - 50} ${endY}, ${endX} ${endY}`;
+                pathElem.setAttribute('d', pathData);
+            }
         };
         
         const drawAllLines = () => {
@@ -413,6 +460,7 @@
             const modeName = isProdMode ? 'Production' : 'Mock';
             uiDisplay.style.color = 'var(--text-color)';
             uiDisplay.textContent = `Switched to ${modeName} mode.`;
+            drawAllLines(); // Redraw lines on toggle to handle potential changes
         };
 
         const animateFlow = () => {
