@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPA Architecture Demo</title>
+    <style>
+        /* General Styles */
+        :root {
+            --mock-color: #007bff;
+            --prod-color: #9d4edd;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+            --label-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --inactive-color: #e9ecef;
+            --contract-color: #e29578;
+            --line-color: #ced4da;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem 0;
+        }
+
+        /* Main Container */
+        .container {
+            width: 90%;
+            max-width: 900px;
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 1rem;
+        }
+        p {
+            margin-bottom: 2rem;
+            color: var(--label-color);
+        }
+
+        /* Architecture Diagram */
+        .diagram {
+            position: relative;
+        }
+        .layer {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .layer h2 {
+            font-size: 1rem;
+            color: var(--label-color);
+            margin: -2.5rem 0 1rem 0;
+            background: #fff;
+            display: inline-block;
+            padding: 0 0.5rem;
+        }
+        .frontend {
+            border-color: #90e0ef;
+        }
+        .backend {
+            border-style: dashed;
+            background-color: var(--inactive-color);
+            opacity: 0.7;
+        }
+
+        /* Components within Layers */
+        .component-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+        .ui-feature, .contracts-container, .service-layer {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+         .ui-feature h3, .contracts-container h3, .service-layer h3 {
+             margin-top: 0;
+             border-bottom: 1px solid var(--border-color);
+             padding-bottom: 0.5rem;
+         }
+        #ui-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background-color: #03045e;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        #ui-button:hover {
+            background-color: #023e8a;
+        }
+        #ui-display {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            min-height: 5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Courier New", monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            flex-grow: 1;
+        }
+        .contract, .implementation {
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .contract {
+            background-color: #ffddd2;
+        }
+        .contract.highlight {
+            border-color: var(--contract-color);
+            box-shadow: 0 0 10px var(--contract-color);
+        }
+        .contract.inactive {
+            opacity: 0.6;
+            background-color: #e9ecef;
+        }
+
+        .implementation {
+            border: 2px solid transparent;
+        }
+        .mock {
+            background-color: #ccdbfd;
+        }
+        .prod {
+            background-color: #e5d4ff;
+        }
+        .implementation.active.mock {
+            border-color: var(--mock-color);
+            box-shadow: 0 0 10px var(--mock-color);
+        }
+        .implementation.active.prod {
+            border-color: var(--prod-color);
+            box-shadow: 0 0 10px var(--prod-color);
+        }
+        .backend-services {
+            padding: 1rem;
+            color: var(--label-color);
+            font-weight: bold;
+        }
+
+        /* Toggle Switch */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--mock-color);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--prod-color);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* SVG Line Styling */
+        #line-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .static-line {
+            stroke: var(--line-color);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 4 4;
+        }
+        .anim-line {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            /* Initially invisible */
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            opacity: 0;
+        }
+        .anim-line.animate {
+            opacity: 1;
+            transition: stroke-dashoffset 0.8s ease-in-out, opacity 0.4s 0.8s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SPA Architecture Demo 🏗️</h1>
+    <p>Visualizing how a UI feature uses a specific contract, fulfilled by swappable services.</p>
+
+    <div class="diagram" id="diagram">
+        <!-- SVG Canvas for lines -->
+        <svg id="line-canvas">
+            <!-- Static lines -->
+            <path id="line-btn-contract" class="static-line"></path>
+            <path id="line-contract-mock" class="static-line"></path>
+            <path id="line-contract-prod" class="static-line"></path>
+            <!-- Animated lines (will be drawn on top) -->
+            <path id="anim-line-btn" class="anim-line"></path>
+            <path id="anim-line-mock" class="anim-line"></path>
+            <path id="anim-line-prod" class="anim-line"></path>
+        </svg>
+        
+        <!-- Layer 1: Frontend -->
+        <div class="layer frontend">
+            <h2>Frontend (Single Page App)</h2>
+            <div class="component-grid">
+                <!-- UI -->
+                <div id="ui-feature" class="ui-feature">
+                    <h3>UI Features</h3>
+                    <button id="ui-button">Refresh Sensors</button>
+                    <div id="ui-display">Click the button to fetch data...</div>
+                </div>
+                <!-- Contracts -->
+                <div id="contracts-container" class="contracts-container">
+                    <h3>Data Contracts</h3>
+                    <div id="sensor-contract" class="contract" title="An agreed-upon format for sensor data">
+                        🤝 Sensor Data Contract
+                    </div>
+                     <div class="contract inactive" title="Another contract for a different feature">
+                        👤 User Profile Contract
+                    </div>
+                </div>
+                <!-- Service Layer -->
+                <div id="service-layer" class="service-layer">
+                    <h3>Service Implementations</h3>
+                    <div id="mock-impl" class="implementation mock active" title="Provides instant, fake data for UI development">
+                        Mock Service
+                    </div>
+                    <div id="prod-impl" class="implementation prod" title="Will connect to the real backend when ready">
+                        Production Service
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layer 2: Backend -->
+        <div class="layer backend">
+            <h2>Backend</h2>
+            <div class="backend-services">
+                ⚙️ Real Services (Under Development)
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2rem 0;">
+    <div class="controls">
+        <span style="color: var(--mock-color); font-weight: bold;">MOCK</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="service-toggle">
+            <span class="slider"></span>
+        </label>
+        <span style="color: var(--prod-color); font-weight: bold;">PRODUCTION</span>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const toggle = document.getElementById('service-toggle');
+        const uiButton = document.getElementById('ui-button');
+        const uiDisplay = document.getElementById('ui-display');
+        const mockImpl = document.getElementById('mock-impl');
+        const prodImpl = document.getElementById('prod-impl');
+        const sensorContract = document.getElementById('sensor-contract');
+        const diagram = document.getElementById('diagram');
+        
+        // SVG Path elements
+        const lineBtnContract = document.getElementById('line-btn-contract');
+        const lineContractMock = document.getElementById('line-contract-mock');
+        const lineContractProd = document.getElementById('line-contract-prod');
+        const animLineBtn = document.getElementById('anim-line-btn');
+        const animLineMock = document.getElementById('anim-line-mock');
+        const animLineProd = document.getElementById('anim-line-prod');
+
+        // --- State ---
+        let isProdMode = false;
+        
+        // --- Functions ---
+        const drawLine = (pathElem, startElem, endElem) => {
+            const diagramRect = diagram.getBoundingClientRect();
+            const startRect = startElem.getBoundingClientRect();
+            const endRect = endElem.getBoundingClientRect();
+
+            // Calculate start and end points relative to the diagram
+            const startX = startRect.right - diagramRect.left;
+            const startY = startRect.top - diagramRect.top + startRect.height / 2;
+            const endX = endRect.left - diagramRect.left;
+            const endY = endRect.top - diagramRect.top + endRect.height / 2;
+            
+            // Create a simple curved path
+            const pathData = `M ${startX} ${startY} C ${startX + 50} ${startY}, ${endX - 50} ${endY}, ${endX} ${endY}`;
+            pathElem.setAttribute('d', pathData);
+        };
+        
+        const drawAllLines = () => {
+            drawLine(lineBtnContract, uiButton, sensorContract);
+            drawLine(lineContractMock, sensorContract, mockImpl);
+            drawLine(lineContractProd, sensorContract, prodImpl);
+            // Also update animation paths
+            animLineBtn.setAttribute('d', lineBtnContract.getAttribute('d'));
+            animLineMock.setAttribute('d', lineContractMock.getAttribute('d'));
+            animLineProd.setAttribute('d', lineContractProd.getAttribute('d'));
+        };
+        
+        const animatePath = (pathElem, color) => {
+            pathElem.style.stroke = color;
+            const length = pathElem.getTotalLength();
+            // Set up the start of the animation
+            pathElem.style.strokeDasharray = length;
+            pathElem.style.strokeDashoffset = length;
+            // Trigger animation
+            pathElem.classList.add('animate');
+            // Animate drawing
+            setTimeout(() => {
+                 pathElem.style.strokeDashoffset = '0';
+            }, 100);
+           
+            // Reset after animation
+            setTimeout(() => {
+                pathElem.classList.remove('animate');
+                pathElem.style.strokeDashoffset = length; // Hide it again
+            }, 2000);
+        };
+
+        const updateImplementations = () => {
+            isProdMode = toggle.checked;
+            mockImpl.classList.toggle('active', !isProdMode);
+            prodImpl.classList.toggle('active', isProdMode);
+            const modeName = isProdMode ? 'Production' : 'Mock';
+            uiDisplay.style.color = 'var(--text-color)';
+            uiDisplay.textContent = `Switched to ${modeName} mode.`;
+        };
+
+        const animateFlow = () => {
+            const flowColor = isProdMode ? 'var(--prod-color)' : 'var(--mock-color)';
+
+            // Highlight contract
+            sensorContract.classList.add('highlight');
+            setTimeout(() => sensorContract.classList.remove('highlight'), 1500);
+
+            // Animate path from button to contract
+            setTimeout(() => animatePath(animLineBtn, flowColor), 0);
+            
+            // Animate path from contract to the correct implementation
+            const targetAnimLine = isProdMode ? animLineProd : animLineMock;
+            setTimeout(() => animatePath(targetAnimLine, flowColor), 500);
+        };
+
+        const fetchData = () => {
+            uiButton.disabled = true;
+            uiDisplay.style.color = 'var(--label-color)';
+            uiDisplay.textContent = 'Fetching data...';
+            
+            animateFlow();
+
+            const delay = isProdMode ? 1800 : 1200;
+
+            setTimeout(() => {
+                if (isProdMode) {
+                    const prodData = {
+                        source: 'Production Env',
+                        deviceId: 'PROD_SENSOR_9981',
+                        value: 24.1,
+                        unit: '°C',
+                        timestamp: new Date().toISOString()
+                    };
+                    uiDisplay.style.color = 'var(--warning-color)';
+                    uiDisplay.textContent = JSON.stringify(prodData, null, 2);
+                } else {
+                    const mockData = {
+                        source: 'Mock Service',
+                        sensorId: 'TEMP-042-ALPHA',
+                        value: 23.7,
+                        unit: '°C',
+                        timestamp: new Date().toISOString()
+                    };
+                    uiDisplay.style.color = 'var(--success-color)';
+                    uiDisplay.textContent = JSON.stringify(mockData, null, 2);
+                }
+                uiButton.disabled = false;
+            }, delay);
+        };
+
+        // --- Event Listeners ---
+        toggle.addEventListener('change', updateImplementations);
+        uiButton.addEventListener('click', fetchData);
+        window.addEventListener('resize', drawAllLines);
+
+        // --- Initial State ---
+        updateImplementations();
+        drawAllLines();
+    });
+</script>
+
+</body>
+</html>
