@@ -96,6 +96,7 @@
              margin-top: 0;
              border-bottom: 1px solid var(--border-color);
              padding-bottom: 0.5rem;
+             margin-bottom: 0;
          }
         #ui-button {
             padding: 0.75rem 1.5rem;
@@ -165,6 +166,19 @@
             padding: 1rem;
             color: var(--label-color);
             font-weight: bold;
+        }
+        
+        /* Descriptive notes styling */
+        .component-note {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: var(--label-color);
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            text-align: left;
+            border-left: 3px solid var(--border-color);
+            background: #fff;
+            border-radius: 0 4px 4px 0;
         }
 
         /* Toggle Switch */
@@ -272,12 +286,14 @@
                 <!-- UI -->
                 <div id="ui-feature" class="ui-feature">
                     <h3>UI Features</h3>
+                     <p class="component-note">This is what the user sees. It's built to work against a "contract," not a specific service. <strong>Its code will not change.</strong></p>
                     <button id="ui-button">Refresh Sensors</button>
                     <div id="ui-display">Click the button to fetch data...</div>
                 </div>
                 <!-- Contracts -->
                 <div id="contracts-container" class="contracts-container">
                     <h3>Data Contracts</h3>
+                    <p class="component-note">The critical agreement defining the data shape. This decouples the UI from the backend, allowing them to evolve independently.</p>
                     <div id="sensor-contract" class="contract" title="An agreed-upon format for sensor data">
                         🤝 Sensor Data Contract
                     </div>
@@ -288,6 +304,7 @@
                 <!-- Service Layer -->
                 <div id="service-layer" class="service-layer">
                     <h3>Service Implementations</h3>
+                    <p class="component-note">Pluggable data sources. We can swap between Mock and Production services with <strong>zero effort or changes to the UI code.</strong></p>
                     <div id="mock-impl" class="implementation mock active" title="Provides instant, fake data for UI development">
                         Mock Service
                     </div>
@@ -302,6 +319,7 @@
         <div class="layer backend">
             <h2>Backend</h2>
             <div class="backend-services">
+                <p class="component-note" style="background: var(--inactive-color);">The future home of our real logic. Once ready, the 'Production Service' will connect to this.</p>
                 ⚙️ Real Services (Under Development)
             </div>
         </div>
